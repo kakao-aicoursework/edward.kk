@@ -10,7 +10,7 @@ class Message(Base):
     isBot: bool
 
 class State(pc.State):
-    form_data: dict = {}
+    loading: bool = False
     messages: list[Message] = []
 
     async def handle_submit(self, form_data: dict):
@@ -22,20 +22,23 @@ class State(pc.State):
                     created_at=datetime.now().strftime("%B %d, %Y %I:%M %p"),
                 )
             ]
-            print(self.messages)
+
+        if(self.loading):
+            return
 
         message = form_data["message"]
         if not message.strip():
             return
 
+        self.loading = True
         addMessage(text=message, isBot=False)
+        yield
+
         res_message = await ai_request(message=message)
         addMessage(text=res_message, isBot=True)
+        self.loading = False
 
-        return [
-            pc.set_value(field_id, "")
-            for field_id in form_data
-        ]
+        yield pc.set_value("message", "")
     pass
 
 def message(message: Message):
@@ -69,6 +72,7 @@ def index() -> pc.Component:
             pc.heading("개발자 도우미", font_size="1em", font_weight="bold"),
             pc.vstack(
                 pc.foreach(State.messages, message),
+                pc.cond(State.loading, pc.button('', is_loading=True), pc.text('')),
                 margin="2rem 0",
                 spacing="1rem",
                 align_items="start",
@@ -83,10 +87,12 @@ def index() -> pc.Component:
                         placeholder="질문을 입력해주세요.",
                         border_color="#eaeaef",
                         width="100%",
+                        is_disabled=State.loading,
                     ),
                     pc.button(
                         "묻기",
                         type_="submit",
+                        is_loading=State.loading,
                     ),
                     display="flex",
                     align_items="center",
