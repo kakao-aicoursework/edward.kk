@@ -7,52 +7,59 @@ from helper_bot.ai import ai_request
 class Message(Base):
     text: str
     created_at: str
-    type: str # 'user' | 'bot'
+    isBot: bool
 
 class State(pc.State):
+    form_data: dict = {}
     messages: list[Message] = []
 
     async def handle_submit(self, form_data: dict):
-        def addMessage(text, type):
+        def addMessage(text: str, isBot: bool):
             self.messages = self.messages + [
                 Message(
                     text=text,
-                    type=type,
+                    isBot=isBot,
                     created_at=datetime.now().strftime("%B %d, %Y %I:%M %p"),
                 )
             ]
+            print(self.messages)
 
         message = form_data["message"]
         if not message.strip():
             return
 
-        addMessage(text=message, type="user")
+        addMessage(text=message, isBot=False)
         res_message = await ai_request(message=message)
-        addMessage(text=res_message, type="bot")
+        addMessage(text=res_message, isBot=True)
+
+        return [
+            pc.set_value(field_id, "")
+            for field_id in form_data
+        ]
     pass
 
 def message(message: Message):
-    print(message.type, message.text)
-
-    if(message.type == 'bot'):
-        return pc.box(
+ 
+    return pc.cond(
+        message.isBot,
+        pc.box(
             pc.text(message.text),
             display="inline_flex",
             font_size="14px",
             background_color="#f5f5f5",
             padding="0.5rem",
             border_radius="8px",
+        ),
+        pc.box(
+            pc.text(message.text),
+            align_self="end",
+            display="inline_flex",
+            font_size="14px",
+            color="#fff",
+            background_color="#3B82F6",
+            padding="0.5rem",
+            border_radius="8px",
         )
-
-    return pc.box(
-        pc.text(message.text),
-        align_self="end",
-        display="inline_flex",
-        font_size="14px",
-        color="#fff",
-        background_color="#3B82F6",
-        padding="0.5rem",
-        border_radius="8px",
     )
 
 def index() -> pc.Component:
