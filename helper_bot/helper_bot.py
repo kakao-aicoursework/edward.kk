@@ -2,34 +2,48 @@ import pynecone as pc
 from pynecone.base import Base
 from datetime import datetime
 
+from helper_bot.ai import ai_request
+
 class Message(Base):
     text: str
     created_at: str
+    type: str # 'user' | 'bot'
 
 class State(pc.State):
     messages: list[Message] = []
 
-    def handle_submit(self, form_data: dict):
-        self.messages = self.messages + [
-            Message(
-                text=form_data["message"],
-                created_at=datetime.now().strftime("%B %d, %Y %I:%M %p"),
-            )
-        ]
+    async def handle_submit(self, form_data: dict):
+        def addMessage(text, type):
+            self.messages = self.messages + [
+                Message(
+                    text=text,
+                    type=type,
+                    created_at=datetime.now().strftime("%B %d, %Y %I:%M %p"),
+                )
+            ]
 
+        message = form_data["message"]
+        if not message.strip():
+            return
+
+        addMessage(text=message, type="user")
+        res_message = await ai_request(message=message)
+        addMessage(text=res_message, type="bot")
     pass
 
-def message(message):
-    return pc.box(
-        pc.text(message.text),
-        display="inline_flex",
-        font_size="14px",
-        background_color="#f5f5f5",
-        padding="0.5rem",
-        border_radius="8px",
-    )
+def message(message: Message):
+    print(message.type, message.text)
 
-def your_message(message):
+    if(message.type == 'bot'):
+        return pc.box(
+            pc.text(message.text),
+            display="inline_flex",
+            font_size="14px",
+            background_color="#f5f5f5",
+            padding="0.5rem",
+            border_radius="8px",
+        )
+
     return pc.box(
         pc.text(message.text),
         align_self="end",
@@ -47,7 +61,7 @@ def index() -> pc.Component:
         pc.vstack(
             pc.heading("개발자 도우미", font_size="1em", font_weight="bold"),
             pc.vstack(
-                pc.foreach(State.messages, your_message),
+                pc.foreach(State.messages, message),
                 margin="2rem 0",
                 spacing="1rem",
                 align_items="start",
@@ -82,7 +96,6 @@ def index() -> pc.Component:
             height="100vh"
         ),
     )
-
 
 # Add state and page to the app.
 app = pc.App(
