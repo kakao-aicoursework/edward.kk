@@ -45,12 +45,15 @@ def message(message: Message):
     return pc.cond(
         message.isBot,
         pc.box(
-            pc.text(message.text),
+            pc.markdown(message.text),
             display="inline_flex",
+            flex_wrap="wrap",
+            gap="0.5rem",
             font_size="14px",
             background_color="#f5f5f5",
-            padding="0.5rem",
+            padding="0.75rem 1rem",
             border_radius="8px",
+            margin_right="7%"
         ),
         pc.box(
             pc.text(message.text),
@@ -61,18 +64,25 @@ def message(message: Message):
             background_color="#3B82F6",
             padding="0.5rem",
             border_radius="8px",
+            margin_left="7%"
         )
     )
 
 def index() -> pc.Component:
     return pc.fragment(
         pc.vstack(
-            pc.heading("개발자 도우미", font_size="1em", font_weight="bold"),
-            pc.vstack(
+            pc.box(
+                pc.text("🤖", font_size="1em"),
+                text_algin="center",
+                margin_top="40px"
+            ),
+            pc.box(
                 pc.foreach(State.messages, message),
                 pc.cond(State.loading, pc.button('', is_loading=True), pc.text('')),
                 margin="2rem 0",
-                spacing="1rem",
+                display="flex",
+                flex_direction="column",
+                gap="1rem",
                 align_items="start",
                 width="100%",
                 height="100%",
@@ -95,15 +105,17 @@ def index() -> pc.Component:
                     display="flex",
                     align_items="center",
                     margin_top="auto",
+                    margin_bottom="50px"
                 ),
                 on_submit=State.handle_submit,
                 width="100%",
             ),
-            spacing="1.5em",
+            spacing="1em",
             font_size="2em",
-            padding="10%",
+            padding="0 10%",
             margin="0 auto",
-            max_width="600px",
+            max_width="700px",
+            box_sizing="content-box",
             height="100vh"
         ),
     )
