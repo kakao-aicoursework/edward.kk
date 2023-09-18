@@ -34,10 +34,9 @@ class State(pc.State):
         addMessage(text=message, isBot=False)
         yield
 
-        res_message = await ai_request(message=message)
+        res_message = ai_request(message=message)
         addMessage(text=res_message, isBot=True)
         self.loading = False
-
         yield pc.set_value("message", "")
     pass
 

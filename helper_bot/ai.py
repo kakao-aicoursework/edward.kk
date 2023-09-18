@@ -1,22 +1,29 @@
-import os
-import openai
+from langchain import LLMChain
+from langchain.chat_models import ChatOpenAI
+from langchain.prompts.chat import (
+    ChatPromptTemplate,
+    HumanMessagePromptTemplate,
+)
+from langchain.schema import (
+    SystemMessage
+)
 
-openai.api_key = os.environ["OPENAI_API_KEY"]
+# langchain 세팅
+llm = ChatOpenAI(temperature=0.8)
+system_message = "assistant는 안내봇으로서 동작한다."
+system_message_prompt = SystemMessage(content=system_message)
 
-async def ai_request(message):
-  system_instruction = f"assistant는 안내봇으로서 동작한다."
+human_template = ("질문: {message}")
+human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
 
-  messages = [
-     {"role": "system", "content": system_instruction},
-     {"role": "user", "content": message},
-  ]
+chain_prompt = ChatPromptTemplate.from_messages([system_message_prompt, human_message_prompt])
+chain = LLMChain(llm=llm, prompt=chain_prompt)
 
+def ai_request(message):
   # API 호출
-  response = await openai.ChatCompletion.acreate(
-    model="gpt-3.5-turbo",
-    messages=messages
+  response_text = chain.run(
+    message=message
   )
-  response_text = response['choices'][0]['message']['content']
 
   # Return
   return response_text
