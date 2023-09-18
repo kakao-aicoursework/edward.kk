@@ -66,7 +66,6 @@ def message(message: Message):
 
 def index() -> pc.Component:
     return pc.fragment(
-        pc.color_mode_button(pc.color_mode_icon(), float="right"),
         pc.vstack(
             pc.heading("개발자 도우미", font_size="1em", font_weight="bold"),
             pc.vstack(
