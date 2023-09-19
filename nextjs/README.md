@@ -11,3 +11,11 @@ OPENAI_API_KEY=
 bun install
 bun dev
 ```
+
+## 개발 히스토리 기록
+
+### 23.09.19 (화)
+
+https://github.com/kakao-aicoursework/edward.kk/assets/65283190/03e4d2ab-8fe0-4042-8803-59463aca0848
+- `nextjs`로 프로젝트 리포멧팅 (~파이썬 커엇..!~)
+- `langchain`활용해서 번역 챗봇 만들기
