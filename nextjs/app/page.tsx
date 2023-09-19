@@ -94,7 +94,7 @@ export default function IndexPage() {
         <div ref={chatAreaRef} className='flex-1 overflow-auto px-2 pt-10 space-y-4'>
           <ChatArea messages={messages} scrollToBottom={scrollToBottom} />
         </div>
-        <div className='pb-20 pl-2 pr-4 pt-4'>
+        <div className='pb-20 px-2 pt-4'>
           <InputArea handleSend={handleSend} scrollToBottom={scrollToBottom} />
         </div>
       </div>

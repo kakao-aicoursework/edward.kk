@@ -33,7 +33,7 @@ export default function InputArea({
             }
           }}
           placeholder='질문을 입력해주세요.'
-          className='rounded-r-none focus-visible:ring-0'
+          className='rounded-r-none text-base focus-visible:ring-0'
         />
         <Button type='submit' className='rounded-none rounded-r-md' onClick={send}>
           <SendIcon className='h-5 w-5' />
