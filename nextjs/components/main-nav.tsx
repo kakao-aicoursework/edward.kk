@@ -6,18 +6,15 @@ import { cn } from '@/lib/utils';
 export function MainNav() {
   return (
     <div className='flex gap-6 md:gap-10'>
-      <Link href='/' className='flex items-center space-x-2'>
-        <span className='inline-block font-bold'>ChatGPT</span>
+      <Link href='/' className='flex items-center space-x-2 text-zinc-900 hover:text-zinc-700'>
+        <span className='inline-block font-bold'>챗봇</span>
       </Link>
       <nav className='flex gap-6'>
         <Link
           href='/'
-          className={cn(
-            'flex items-center text-sm font-medium text-muted-foreground',
-            'cursor-not-allowed opacity-80',
-          )}
+          className={cn('flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-700')}
         >
-          Home
+          Kakao Developers Helper
         </Link>
       </nav>
     </div>

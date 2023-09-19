@@ -22,7 +22,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         >
           <div className='relative flex h-screen flex-col'>
             <SiteHeader />
-            <div className='flex-1'>{children}</div>
+            <div className='flex-1 pt-16'>{children}</div>
           </div>
         </body>
       </html>

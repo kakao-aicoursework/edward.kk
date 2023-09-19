@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "ui": "bunx shadcn-ui@latest"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.0.2",
@@ -19,7 +20,7 @@
     "clsx": "^2.0.0",
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.13",
-    "lucide-react": "^0.265.0",
+    "lucide-react": "^0.279.0",
     "next": "13.4.13",
     "openai": "^3.3.0",
     "openai-edge": "^1.2.2",
@@ -29,7 +30,7 @@
     "react-dom": "18.2.0",
     "tailwind-merge": "^1.14.0",
     "tailwindcss": "3.3.3",
-    "tailwindcss-animate": "^1.0.6",
+    "tailwindcss-animate": "^1.0.7",
     "typescript": "5.1.6"
   }
 }

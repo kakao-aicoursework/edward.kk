@@ -94,18 +94,15 @@ export default function IndexPage() {
   }, []);
 
   return (
-    <>
-      <div className='flex absolute bottom-0 justify-center w-full'>
-        <div className='md:w-1/2'>
-          <div ref={chatAreaRef} className='h-screen overflow-auto pl-2 pr-4 pt-40'>
-            <ChatArea messages={messages} scrollToBottom={scrollToBottom} />
-          </div>
-
-          <div className='pb-5 pl-2 pr-4 pt-4'>
-            <InputArea handleSend={handleSend} scrollToBottom={scrollToBottom} />
-          </div>
+    <div className='absolute inset-0 top-16'>
+      <div className='mx-auto flex flex-col w-full h-full md:w-1/2 '>
+        <div ref={chatAreaRef} className='flex-1 overflow-auto px-2 pt-10 space-y-4'>
+          <ChatArea messages={messages} scrollToBottom={scrollToBottom} />
+        </div>
+        <div className='pb-20 pl-2 pr-4 pt-4'>
+          <InputArea handleSend={handleSend} scrollToBottom={scrollToBottom} />
         </div>
       </div>
-    </>
+    </div>
   );
 }
