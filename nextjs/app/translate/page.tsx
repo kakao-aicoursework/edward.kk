@@ -9,26 +9,13 @@ import useMessage from '@/lib/use-message';
 const initialMessages: Message[] = [
   {
     role: 'assistant',
-    content: '안녕하세요. 챗봇 서비스를 시작합니다. 궁금하신 내용을 물어보세요?',
+    content: '<b>한</b> to the <b>영</b>, 과정을 친절히 설명해주는 번역 챗봇 입니다.',
   },
-  // 아래는 메시지 구조 예시입니다.
-  // {
-  //   role: "user",
-  //   content: "{사용자 입력}",
-  // },
-  // { // 답변 생성 대기 중 상태
-  //   role: "assistant",
-  //   status: "thinking",
-  // },
-  // {
-  //   role: "assistant",
-  //   content: "{답변 내용}",
-  // }
 ];
 
-export default function IndexPage() {
+export default function TranslatePage() {
   const { chatAreaRef, messages, handleSend } = useMessage({
-    apiUrl: '/api/chat',
+    apiUrl: '/api/translate',
     initialMessages,
   });
 

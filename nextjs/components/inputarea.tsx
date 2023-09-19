@@ -3,18 +3,11 @@ import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 import { SendIcon } from './ui/icons';
 
-export default function InputArea({
-  handleSend,
-  scrollToBottom,
-}: {
-  handleSend: Function;
-  scrollToBottom: Function;
-}) {
+export default function InputArea({ handleSend }: { handleSend: Function }) {
   const [query, setQuery] = useState<string>('');
 
   const send = () => {
     handleSend(query);
-    scrollToBottom();
     setQuery('');
   };
 
@@ -32,7 +25,7 @@ export default function InputArea({
               send(); // Enter 입력이 되면 클릭 이벤트 실행
             }
           }}
-          placeholder='질문을 입력해주세요.'
+          placeholder='Send a message'
           className='rounded-r-none text-base focus-visible:ring-0'
         />
         <Button type='submit' className='rounded-none rounded-r-md' onClick={send}>

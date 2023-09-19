@@ -14,6 +14,18 @@ export function MainNav() {
           href='/'
           className={cn('flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-700')}
         >
+          채팅
+        </Link>
+        <Link
+          href='/translate'
+          className={cn('flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-700')}
+        >
+          한/영 번역기
+        </Link>
+        <Link
+          href='/'
+          className={cn('flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-700')}
+        >
           Kakao Developers Helper
         </Link>
       </nav>
