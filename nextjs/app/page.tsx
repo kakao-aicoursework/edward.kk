@@ -4,12 +4,7 @@ import InputArea from '@/components/inputarea';
 import ChatArea from '@/components/chatarea';
 
 import { useEffect, useRef, useState } from 'react';
-
-interface Message {
-  role: 'user' | 'assistant';
-  content?: string;
-  status?: 'thinking';
-}
+import { Message } from '@/lib/types';
 
 const initialMessages: Message[] = [
   {
@@ -42,16 +37,16 @@ export default function IndexPage() {
   };
 
   const handleSend = async (message: string) => {
-    let updatedMessages = [
+    let updatedMessages: Message[] = [
       ...messages,
       {
         role: 'user',
         content: message,
-      } as Message,
+      },
       {
         role: 'assistant',
         status: 'thinking',
-      } as Message,
+      },
     ];
 
     setMessages(updatedMessages);

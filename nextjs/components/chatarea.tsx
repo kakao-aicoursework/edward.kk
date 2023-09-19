@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { SpinnerIcon } from './ui/icons';
+import { Message } from '@/lib/types';
 
 export default function ChatArea({
   messages,
   scrollToBottom,
 }: {
-  messages: Array<any>;
+  messages: Message[];
   scrollToBottom: Function;
 }) {
   useEffect(() => {
