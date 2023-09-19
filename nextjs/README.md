@@ -2,6 +2,12 @@
 
 기획서: https://docs.google.com/document/d/1uKUALDORJQDGZnfd0DjVyof0xwAhCGUC/edit
 
-pynecone을 활용하는 버전 [→](./pynecone/)
+```env
+# .env
+OPENAI_API_KEY=
+```
 
-nextjs을 활용하는 버전 [→](./nextjs/)
+```shell
+bun install
+bun dev
+```
