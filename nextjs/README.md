@@ -29,11 +29,15 @@ https://github.com/kakao-aicoursework/edward.kk/assets/65283190/03e4d2ab-8fe0-40
 
 ### 23.09.21 (목)
 
-next.js에서 streaming + data load 환경 세팅에 많은 시간이 소요되었다.
-vercel 공식문서는 edge 환경으로 소개하지만 langchain은 nodejs 환경 중심으로 소개하는데 좀 충돌되는 부분이 많았다.
+- next.js에서 streaming + data load 환경 세팅에 많은 시간이 소요되었다.
 
-텍스트 파일을 [retrieve](https://js.langchain.com/docs/expression_language/cookbook/retrieval) 하려했지만 검색된 내용이 너무 많은 것 같다..
+  - vercel 공식문서는 edge 환경으로 소개하지만 langchain은 nodejs 환경 중심으로 소개하는데 좀 충돌되는 부분이 많았다.
+  - -> node 18 + local memory 를 사용하는 것으로 우선 해결.
 
-```text
-adRequestError: This model's maximum context length is 4097 tokens. However, your messages resulted in 10053 tokens. Please reduce the length of the messages
-```
+- 텍스트 파일을 [retrieve](https://js.langchain.com/docs/expression_language/cookbook/retrieval) 하려했지만 검색된 내용이 너무 많은 것 같다..
+  - ```text
+    adRequestError: This model's maximum context length is 4097 tokens. However, your messages resulted in 10053 tokens. Please reduce the length of the messages
+    ```
+  - -> 많은 TextSplitter 중 깔끔하게 [MarkdownTextSplitter](https://js.langchain.com/docs/api/text_splitter/classes/MarkdownTextSplitter) 하나를 사용하면 꽤나 잘 문서를 찾아내서 해결.
+
+https://github.com/kakao-aicoursework/edward.kk/assets/65283190/94959f53-e9d1-4a56-b3b6-31955623482a

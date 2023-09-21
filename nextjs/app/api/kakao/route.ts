@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { Message as VercelChatMessage, StreamingTextResponse } from 'ai';
 
 import { ChatOpenAI } from 'langchain/chat_models/openai';
@@ -6,11 +6,19 @@ import { BytesOutputParser, StringOutputParser } from 'langchain/schema/output_p
 import { RunnableSequence, RunnablePassthrough } from 'langchain/schema/runnable';
 import { PromptTemplate } from 'langchain/prompts';
 
+import { Document } from 'langchain/document';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
-import { Document } from 'langchain/document';
+import {
+  MarkdownTextSplitter,
+  RecursiveCharacterTextSplitter,
+  TokenTextSplitter,
+} from 'langchain/text_splitter';
+
+import { z } from 'zod';
+import { createMetadataTaggerFromZod } from 'langchain/document_transformers/openai_functions';
 
 // export const runtime = 'edge';
 export const runtime = 'nodejs';
@@ -24,6 +32,7 @@ const formatMessage = (message: VercelChatMessage) => {
 };
 
 const serializeDocs = (docs: Document[]) => {
+  console.log('serializeDocs', docs.map((doc) => doc.pageContent).join('\n'));
   return docs.map((doc) => doc.pageContent).join('\n');
 };
 
@@ -39,64 +48,78 @@ Question: {question}`;
  * https://js.langchain.com/docs/guides/expression_language/cookbook#prompttemplate--llm--outputparser
  */
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const messages = body.messages ?? [];
-  const formattedPreviousMessages = messages.slice(0, -1).map(formatMessage);
-  const currentMessageContent = messages[messages.length - 1].content;
+  try {
+    const body = await req.json();
+    const messages = body.messages ?? [];
+    const formattedPreviousMessages = messages.slice(0, -1).map(formatMessage);
+    const currentMessageContent = messages[messages.length - 1].content;
 
-  // vector
-  const loader = new DirectoryLoader('assets', {
-    '.txt': (path) => new TextLoader(path),
-  });
-  const docs = await loader.load();
+    // vector
+    const loader = new DirectoryLoader('assets', {
+      '.txt': (path) => new TextLoader(path),
+    });
+    const rawDocs = await loader.load();
 
-  const vectorStore = await MemoryVectorStore.fromDocuments(docs, new OpenAIEmbeddings());
-  // const resultOne = await vectorStore.similaritySearch(currentMessageContent, 1);
-  // console.log(resultOne);
+    const markDownSplitter = new MarkdownTextSplitter({
+      chunkSize: 200,
+      chunkOverlap: 0,
+    });
+    const markdownSplittedDocs = await markDownSplitter.splitDocuments(rawDocs);
+    // console.log('markdownSplittedDocs', markdownSplittedDocs);
 
-  // const vectorStore = await Chroma.fromDocuments(docs, new OpenAIEmbeddings(), {
-  //   collectionName: 'a-test-collection',
-  //   url: 'http://localhost:8000', // Optional, will default to this value
-  // });
-  // const response = await vectorStore.similaritySearch('카카오싱크', 1);
-  // console.log(response);
+    // const lineSplitter = new RecursiveCharacterTextSplitter({
+    //   chunkSize: 1000,
+    //   chunkOverlap: 150,
+    //   separators: ['\r\n\r\n', '\r\n', '\n'],
+    // });
+    // const lineSplittedDocs = await lineSplitter.splitDocuments(markdownSplittedDocs);
+    // console.log('lineSplittedDocs', lineSplittedDocs);
 
-  const retriever = vectorStore.asRetriever();
+    // const tokenSplitter = new TokenTextSplitter({
+    //   encodingName: 'gpt2',
+    //   chunkSize: 10,
+    //   chunkOverlap: 0,
+    // });
+    // const tokenSplittedDocs = await tokenSplitter.splitDocuments(lineSplittedDocs);
+    // console.log('tokenSplittedDocs', tokenSplittedDocs);
 
-  // chain
-  const prompt = PromptTemplate.fromTemplate(TEMPLATE);
+    const vectorStore = await MemoryVectorStore.fromDocuments(
+      markdownSplittedDocs,
+      new OpenAIEmbeddings(),
+    );
+    // const resultOne = await vectorStore.similaritySearch(currentMessageContent, 1);
+    // console.log(resultOne);
 
-  const model = new ChatOpenAI({
-    temperature: 0.1,
-  });
+    // const vectorStore = await Chroma.fromDocuments(docs, new OpenAIEmbeddings(), {
+    //   collectionName: 'a-test-collection',
+    //   url: 'http://localhost:8000', // Optional, will default to this value
+    // });
+    // const response = await vectorStore.similaritySearch('카카오싱크', 1);
+    // console.log(response);
 
-  const chain = RunnableSequence.from([
-    {
-      context: retriever.pipe(serializeDocs),
-      question: new RunnablePassthrough(),
-    },
-    prompt,
-    model,
-    new StringOutputParser(),
-  ]);
+    const retriever = vectorStore.asRetriever();
 
-  const result = await chain.invoke(currentMessageContent);
-  console.log(result);
+    // chain
+    const prompt = PromptTemplate.fromTemplate(TEMPLATE);
 
-  // const stream = await chain.stream({
-  //   question: currentMessageContent,
-  // });
+    const model = new ChatOpenAI({
+      streaming: true,
+      temperature: 0,
+    });
 
-  // return new StreamingTextResponse(stream);
+    const chain = RunnableSequence.from([
+      {
+        context: retriever.pipe(serializeDocs),
+        question: new RunnablePassthrough(),
+      },
+      prompt,
+      model,
+      new StringOutputParser(),
+    ]);
 
-  const encoder = new TextEncoder();
-  const customReadable = new ReadableStream({
-    start(controller) {
-      controller.enqueue(encoder.encode(result));
-      controller.close();
-    },
-  });
-  return new Response(customReadable as BodyInit, {
-    headers: { 'Content-Type': 'text/html; charset=utf-8' },
-  });
+    const stream = await chain.stream(currentMessageContent);
+    return new StreamingTextResponse(stream);
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
 }
