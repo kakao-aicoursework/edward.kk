@@ -5,11 +5,7 @@ import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { MarkdownTextSplitter } from 'langchain/text_splitter';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 
-const serializeDocs = (docs: Document[]) => {
-  return docs.map((doc) => doc.pageContent).join('\n');
-};
-
-export const getDocRetrieve = async () => {
+export const getDocsVectorStore = async () => {
   const loader = new DirectoryLoader('assets', {
     '.txt': (path) => new TextLoader(path),
   });
@@ -23,10 +19,10 @@ export const getDocRetrieve = async () => {
 
   const vectorStore = await MemoryVectorStore.fromDocuments(
     markdownSplittedDocs,
-    new OpenAIEmbeddings(),
+    new OpenAIEmbeddings({
+      verbose: true,
+    }),
   );
-  const retriever = vectorStore.asRetriever();
-  const retrieve = retriever.pipe(serializeDocs);
 
-  return retrieve;
+  return vectorStore;
 };

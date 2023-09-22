@@ -5,11 +5,7 @@ import { BytesOutputParser } from 'langchain/schema/output_parser';
 import { RunnableSequence, RunnablePassthrough } from 'langchain/schema/runnable';
 
 import { bugChain, freeTalkChain, intentChain, questionChain } from './ai-chians';
-import { getDocRetrieve } from './ai-vector';
-import { PromptTemplate } from 'langchain/prompts';
-import { ChatOpenAI } from 'langchain/chat_models/openai';
-
-export const runtime = 'nodejs';
+import { getDocsVectorStore } from './ai-vector';
 
 const formatMessage = (message: Message) => {
   return `${message.role}: ${message.content}`;
@@ -38,14 +34,21 @@ export async function POST(req: NextRequest) {
 
     switch (content) {
       case 'free talk':
-        streamChain = RunnableSequence.from([freeTalkChain, new BytesOutputParser()]);
+        streamChain = RunnableSequence.from([
+          {
+            message: new RunnablePassthrough(),
+          },
+          freeTalkChain,
+          new BytesOutputParser(),
+        ]);
         break;
       case 'question':
-        const retrieve = await getDocRetrieve();
+        const vectorStore = await getDocsVectorStore();
+        const retriever = vectorStore.asRetriever();
 
         streamChain = RunnableSequence.from([
           {
-            context: retrieve,
+            context: retriever.pipe((docs) => docs.map((doc) => doc.pageContent).join('/n')),
             question: new RunnablePassthrough(),
           },
           questionChain,
@@ -53,13 +56,17 @@ export async function POST(req: NextRequest) {
         ]);
         break;
       default:
-        streamChain = RunnableSequence.from([bugChain, new BytesOutputParser()]);
+        streamChain = RunnableSequence.from([
+          {
+            message: new RunnablePassthrough(),
+          },
+          bugChain,
+          new BytesOutputParser(),
+        ]);
         break;
     }
 
-    const stream = await streamChain.stream({
-      message: currentMessageContent,
-    });
+    const stream = await streamChain.stream(currentMessageContent);
 
     return new StreamingTextResponse(stream);
   } catch (e: any) {
