@@ -32,8 +32,11 @@ const formatMessage = (message: VercelChatMessage) => {
 };
 
 const serializeDocs = (docs: Document[]) => {
-  console.log('serializeDocs', docs.map((doc) => doc.pageContent).join('\n'));
-  return docs.map((doc) => doc.pageContent).join('\n');
+  const text = docs.map((doc) => doc.pageContent).join('\n');
+  console.log('============');
+  console.log(text);
+  console.log('============');
+  return text;
 };
 
 const TEMPLATE = `Answer the question based only on the following context:
@@ -61,41 +64,15 @@ export async function POST(req: NextRequest) {
     const rawDocs = await loader.load();
 
     const markDownSplitter = new MarkdownTextSplitter({
-      chunkSize: 200,
-      chunkOverlap: 0,
+      chunkSize: 500,
+      chunkOverlap: 100,
     });
     const markdownSplittedDocs = await markDownSplitter.splitDocuments(rawDocs);
-    // console.log('markdownSplittedDocs', markdownSplittedDocs);
-
-    // const lineSplitter = new RecursiveCharacterTextSplitter({
-    //   chunkSize: 1000,
-    //   chunkOverlap: 150,
-    //   separators: ['\r\n\r\n', '\r\n', '\n'],
-    // });
-    // const lineSplittedDocs = await lineSplitter.splitDocuments(markdownSplittedDocs);
-    // console.log('lineSplittedDocs', lineSplittedDocs);
-
-    // const tokenSplitter = new TokenTextSplitter({
-    //   encodingName: 'gpt2',
-    //   chunkSize: 10,
-    //   chunkOverlap: 0,
-    // });
-    // const tokenSplittedDocs = await tokenSplitter.splitDocuments(lineSplittedDocs);
-    // console.log('tokenSplittedDocs', tokenSplittedDocs);
 
     const vectorStore = await MemoryVectorStore.fromDocuments(
       markdownSplittedDocs,
       new OpenAIEmbeddings(),
     );
-    // const resultOne = await vectorStore.similaritySearch(currentMessageContent, 1);
-    // console.log(resultOne);
-
-    // const vectorStore = await Chroma.fromDocuments(docs, new OpenAIEmbeddings(), {
-    //   collectionName: 'a-test-collection',
-    //   url: 'http://localhost:8000', // Optional, will default to this value
-    // });
-    // const response = await vectorStore.similaritySearch('카카오싱크', 1);
-    // console.log(response);
 
     const retriever = vectorStore.asRetriever();
 
