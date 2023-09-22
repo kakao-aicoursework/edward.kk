@@ -6,6 +6,8 @@ import { RunnableSequence, RunnablePassthrough } from 'langchain/schema/runnable
 
 import { bugChain, freeTalkChain, intentChain, questionChain } from './ai-chians';
 import { getDocRetrieve } from './ai-vector';
+import { PromptTemplate } from 'langchain/prompts';
+import { ChatOpenAI } from 'langchain/chat_models/openai';
 
 export const runtime = 'nodejs';
 
@@ -28,13 +30,13 @@ export async function POST(req: NextRequest) {
     // chain
     let streamChain: RunnableSequence;
 
-    const { intent } = await intentChain.call({
+    const { content } = await intentChain.invoke({
       message: currentMessageContent,
     });
 
-    console.log(`>>>> ${intent} <<<<`);
+    console.log(`>>>> ${content} <<<<`);
 
-    switch (intent) {
+    switch (content) {
       case 'free talk':
         streamChain = RunnableSequence.from([freeTalkChain, new BytesOutputParser()]);
         break;
